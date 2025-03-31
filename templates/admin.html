@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - RecipeHub{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Admin Dashboard</h1>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h1 class="display-4" id="totalUsers">-</h1>
+                <p class="lead">Total Users</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h1 class="display-4" id="totalRecipes">-</h1>
+                <p class="lead">Recipes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <h1 class="display-4" id="totalReviews">-</h1>
+                <p class="lead">Reviews</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Import Recipes</h5>
+            </div>
+            <div class="card-body">
+                <p>Import new recipes from the Spoonacular API to populate your database.</p>
+                <button id="importRecipesBtn" class="btn btn-success">
+                    <i class="fas fa-cloud-download-alt me-1"></i> Import Recipes
+                </button>
+                <div id="importStatus" class="mt-3 d-none"></div>
+            </div>
+        </div>
+        
+        
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Top Recipes</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Recipe</th>
+                                <th>Rating</th>
+                                <th>Reviews</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topRecipesBody">
+                            <!-- Data will be inserted here via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load admin stats
+    fetch('/api/admin/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('totalUsers').textContent = data.stats.total_users;
+                document.getElementById('totalRecipes').textContent = data.stats.total_recipes;
+                document.getElementById('totalReviews').textContent = data.stats.total_reviews;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading admin stats:', error);
+        });
+    
+    // Import recipes button
+    const importRecipesBtn = document.getElementById('importRecipesBtn');
+    if (importRecipesBtn) {
+        importRecipesBtn.addEventListener('click', function() {
+            const importStatus = document.getElementById('importStatus');
+            importStatus.innerHTML = '<div class="spinner-border text-success spinner-border-sm me-2" role="status"></div> Importing recipes...';
+            importStatus.classList.remove('d-none');
+            importStatus.classList.remove('alert-success', 'alert-danger');
+            importStatus.classList.add('alert', 'alert-info');
+            
+            fetch('/api/fetch-recipes')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        importStatus.innerHTML = `<i class="fas fa-check-circle me-2"></i> Successfully imported ${data.recipes_imported} recipes!`;
+                        importStatus.classList.remove('alert-info', 'alert-danger');
+                        importStatus.classList.add('alert-success');
+                    } else {
+                        importStatus.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i> Error: ${data.error}`;
+                        importStatus.classList.remove('alert-info', 'alert-success');
+                        importStatus.classList.add('alert-danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error importing recipes:', error);
+                    importStatus.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i> Error occurred while importing recipes.';
+                    importStatus.classList.remove('alert-info', 'alert-success');
+                    importStatus.classList.add('alert-danger');
+                });
+        });
+    }
+    
+    // Make admin button
+    const makeAdminBtn = document.getElementById('makeAdminBtn');
+    if (makeAdminBtn) {
+        makeAdminBtn.addEventListener('click', function() {
+            const userId = document.getElementById('userIdInput').value;
+            if (!userId) {
+                alert('Please enter a user ID');
+                return;
+            }
+            
+            fetch('/api/admin/set-admin-claim', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    is_admin: true
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`User ${userId} is now an admin!`);
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error setting admin claim:', error);
+                alert('Error setting admin claim. Please try again later.');
+            });
+        });
+    }
+    
+    // Remove admin button
+    const removeAdminBtn = document.getElementById('removeAdminBtn');
+    if (removeAdminBtn) {
+        removeAdminBtn.addEventListener('click', function() {
+            const userId = document.getElementById('userIdInput').value;
+            if (!userId) {
+                alert('Please enter a user ID');
+                return;
+            }
+            
+            fetch('/api/admin/set-admin-claim', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    is_admin: false
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Admin privileges removed from user ${userId}!`);
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error removing admin claim:', error);
+                alert('Error removing admin claim. Please try again later.');
+            });
+        });
+    }
+
+    // Fetch top recipes
+    fetch('/api/admin/top-recipes')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const tbody = document.getElementById('topRecipesBody');
+                tbody.innerHTML = '';
+                
+                data.recipes.forEach(recipe => {
+                    const row = `
+                        <tr>
+                            <td>${recipe.title}</td>
+                            <td>
+                                <div class="text-warning">
+                                    ${'<i class="fas fa-star"></i>'.repeat(Math.floor(recipe.avg_rating))}
+                                    ${recipe.avg_rating % 1 !== 0 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                                    ${'<i class="far fa-star"></i>'.repeat(5 - Math.ceil(recipe.avg_rating))}
+                                </div>
+                                <small class="text-muted">${recipe.avg_rating}/5</small>
+                            </td>
+                            <td>${recipe.review_count}</td>
+                            <td>
+                                <a href="/recipe/${recipe.id}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button class="btn btn-sm btn-outline-danger delete-reviews-btn" 
+                                        data-recipe-id="${recipe.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching top recipes:', error);
+        });
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.delete-reviews-btn')) {
+            const btn = e.target.closest('.delete-reviews-btn');
+            const recipeId = btn.dataset.recipeId;
+            
+            if (confirm(`Delete ALL reviews for this recipe? (${recipeId})`)) {
+                fetch(`/api/admin/delete-recipe-reviews/${recipeId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        btn.closest('tr').remove();
+                        alert('All reviews deleted successfully');
+                    }
+                })
+                .catch(error => {
+                    console.error('Delete error:', error);
+                    alert('Error deleting reviews');
+                });
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

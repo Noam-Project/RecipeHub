@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - RecipeHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <h1 class="text-center mb-4">Login</h1>
+                
+                <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+                
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-success btn-lg">Login</button>
+                    </div>
+                    <div class="text-center mb-3">
+                        <a href="#" id="resetPassword">Forgot Password?</a>
+                    </div>
+                </form>
+                
+                <hr>
+                <div class="text-center">
+                    <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Login form submit
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorElement = document.getElementById('loginError');
+        
+        // Hide any previous errors
+        errorElement.classList.add('d-none');
+        
+        // Show loading state
+        const submitBtn = document.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...';
+        
+        // Sign in with email and password
+        firebase.auth().signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Show success message
+                errorElement.textContent = "Login successful! Redirecting...";
+                errorElement.classList.remove('d-none', 'alert-danger');
+                errorElement.classList.add('alert-success');
+                
+                // Get ID token for server session
+                userCredential.user.getIdToken().then(idToken => {
+                    // Create session on server
+                    fetch('/api/create-session', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ idToken: idToken }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Session created:', data);
+                        // Redirect to home page after successful login
+                        window.location.href = "{{ url_for('index') }}";
+                    })
+                    .catch(error => {
+                        console.error('Error creating session:', error);
+                        // Force redirect anyway after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = "{{ url_for('index') }}";
+                        }, 2000);
+                    });
+                });
+            })
+            .catch((error) => {
+                // Restore button state
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Login';
+                
+                // Show error message
+                errorElement.textContent = error.message;
+                errorElement.classList.remove('d-none');
+                errorElement.classList.add('alert-danger');
+                console.error("Login error:", error);
+            });
+    });
+    
+    // Reset password
+    document.getElementById('resetPassword').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        if (!email) {
+            alert('Please enter your email address');
+            return;
+        }
+        
+        firebase.auth().sendPasswordResetEmail(email)
+            .then(() => {
+                alert('Password reset email sent. Check your inbox.');
+            })
+            .catch((error) => {
+                alert('Error: ' + error.message);
+            });
+    });
+});
+</script>
+{% endblock %}  

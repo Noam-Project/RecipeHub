@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+
+{% block title %}Recipes - RecipeHub{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Browse Recipes</h1>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="input-group">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search recipes by name, ingredients...">
+            <button id="searchBtn" class="btn btn-success">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse" data-bs-target="#filterOptions">
+            <i class="fas fa-filter"></i> Filter Options
+        </button>
+    </div>
+</div>
+
+<div class="collapse mb-4" id="filterOptions">
+    <div class="card card-body">
+        <h5>Dietary Preferences</h5>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input filter-checkbox" type="checkbox" value="vegetarian" id="vegetarian">
+                    <label class="form-check-label" for="vegetarian">
+                        Vegetarian
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input filter-checkbox" type="checkbox" value="vegan" id="vegan">
+                    <label class="form-check-label" for="vegan">
+                        Vegan
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input filter-checkbox" type="checkbox" value="glutenFree" id="glutenFree">
+                    <label class="form-check-label" for="glutenFree">
+                        Gluten-Free
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input filter-checkbox" type="checkbox" value="dairyFree" id="dairyFree">
+                    <label class="form-check-label" for="dairyFree">
+                        Dairy-Free
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <h5>Meal Type</h5>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input filter-checkbox" type="checkbox" value="breakfast" id="breakfast">
+                    <label class="form-check-label" for="breakfast">
+                        Breakfast
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input filter-checkbox" type="checkbox" value="lunch" id="lunch">
+                    <label class="form-check-label" for="lunch">
+                        Lunch
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input filter-checkbox" type="checkbox" value="dinner" id="dinner">
+                    <label class="form-check-label" for="dinner">
+                        Dinner
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input filter-checkbox" type="checkbox" value="dessert" id="dessert">
+                    <label class="form-check-label" for="dessert">
+                        Dessert
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <h5>Cook Time</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <label for="maxTime" class="form-label">Maximum Time (minutes)</label>
+                <input type="range" class="form-range" id="maxTime" min="15" max="120" step="15" value="120">
+                <div class="text-center">
+                    <span id="maxTimeValue">120</span> minutes
+                </div>
+            </div>
+            <div class="col-md-6 d-flex justify-content-end align-items-end">
+                <button id="applyFilters" class="btn btn-success">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="loadingSpinner" class="text-center d-none">
+    <div class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p>Loading recipes...</p>
+</div>
+
+<div id="noResults" class="alert alert-info d-none">
+    No recipes found matching your criteria. Try adjusting your filters.
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" id="recipeContainer">
+    {% for recipe in recipes %}
+    <div class="col recipe-card" 
+        data-vegetarian="{{ recipe.vegetarian|lower }}" 
+        data-vegan="{{ recipe.vegan|lower }}" 
+        data-gluten-free="{{ recipe.glutenFree|lower }}" 
+        data-dairy-free="{{ recipe.dairyFree|lower }}"
+        data-ready-in-minutes="{{ recipe.readyInMinutes }}"
+        data-meal-type="{{ recipe.dishTypes|join(' ') }}">
+        <div class="card h-100 shadow-sm">
+            <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ recipe.title }}</h5>
+                <p class="card-text text-muted">
+                    <i class="far fa-clock me-1"></i> {{ recipe.readyInMinutes }} min
+                    {% if recipe.vegetarian %}
+                    <span class="badge bg-success ms-2">Vegetarian</span>
+                    {% endif %}
+                    {% if recipe.vegan %}
+                    <span class="badge bg-success ms-2">Vegan</span>
+                    {% endif %}
+                    {% if recipe.glutenFree %}
+                    <span class="badge bg-warning ms-2">Gluten-Free</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="btn btn-outline-success w-100">View Recipe</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update max time display
+    const maxTimeSlider = document.getElementById('maxTime');
+    const maxTimeValue = document.getElementById('maxTimeValue');
+    
+    maxTimeSlider.addEventListener('input', function() {
+        maxTimeValue.textContent = this.value;
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const recipeCards = document.querySelectorAll('.recipe-card');
+    const noResults = document.getElementById('noResults');
+    
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let resultsFound = false;
+        
+        recipeCards.forEach(card => {
+            const title = card.querySelector('.card-title').textContent.toLowerCase();
+            
+            if (title.includes(searchTerm)) {
+                card.classList.remove('d-none');
+                resultsFound = true;
+            } else {
+                card.classList.add('d-none');
+            }
+        });
+        
+        if (resultsFound) {
+            noResults.classList.add('d-none');
+        } else {
+            noResults.classList.remove('d-none');
+        }
+    }
+    
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+    
+    // Apply filters
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    
+    applyFiltersBtn.addEventListener('click', function() {
+        // Show loading spinner
+        document.getElementById('loadingSpinner').classList.remove('d-none');
+        
+        // Get all selected filter values
+        const selectedFilters = {
+            dietary: [],
+            mealType: [],
+            maxTime: parseInt(maxTimeSlider.value)
+        };
+        
+        // Collect dietary filters
+        if (document.getElementById('vegetarian').checked) selectedFilters.dietary.push('vegetarian');
+        if (document.getElementById('vegan').checked) selectedFilters.dietary.push('vegan');
+        if (document.getElementById('glutenFree').checked) selectedFilters.dietary.push('glutenFree');
+        if (document.getElementById('dairyFree').checked) selectedFilters.dietary.push('dairyFree');
+        
+        // Collect meal type filters
+        if (document.getElementById('breakfast').checked) selectedFilters.mealType.push('breakfast');
+        if (document.getElementById('lunch').checked) selectedFilters.mealType.push('lunch');
+        if (document.getElementById('dinner').checked) selectedFilters.mealType.push('dinner');
+        if (document.getElementById('dessert').checked) selectedFilters.mealType.push('dessert');
+        
+        // Apply filters
+        let resultsFound = false;
+        
+        recipeCards.forEach(card => {
+            let showCard = true;
+            
+            // Apply dietary filters
+            for (const diet of selectedFilters.dietary) {
+                if (card.dataset[diet] !== 'true') {
+                    showCard = false;
+                    break;
+                }
+            }
+            
+            // Apply meal type filters if card is still visible
+            if (showCard && selectedFilters.mealType.length > 0) {
+                const mealTypes = card.dataset.mealType.toLowerCase();
+                let matchesMealType = false;
+                
+                for (const type of selectedFilters.mealType) {
+                    if (mealTypes.includes(type)) {
+                        matchesMealType = true;
+                        break;
+                    }
+                }
+                
+                if (!matchesMealType) {
+                    showCard = false;
+                }
+            }
+            
+            // Apply time filter
+            if (showCard && parseInt(card.dataset.readyInMinutes) > selectedFilters.maxTime) {
+                showCard = false;
+            }
+            
+            // Show or hide card
+            if (showCard) {
+                card.classList.remove('d-none');
+                resultsFound = true;
+            } else {
+                card.classList.add('d-none');
+            }
+        });
+        
+        // Hide loading spinner
+        document.getElementById('loadingSpinner').classList.add('d-none');
+        
+        // Show or hide no results message
+        if (resultsFound) {
+            noResults.classList.add('d-none');
+        } else {
+            noResults.classList.remove('d-none');
+        }
+    });
+});
+</script>
+{% endblock %} 

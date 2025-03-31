@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - RecipeHub{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-md-6 d-flex flex-column justify-content-center">
+        <h1 class="display-4 fw-bold mb-3">Discover, Cook, Share</h1>
+        <p class="lead mb-4">RecipeHub is your all-in-one platform for recipe management, meal planning, and culinary inspiration. Explore thousands of recipes, save your favorites, and plan your weekly meals with ease.</p>
+        <div class="d-flex gap-3">
+            <a href="{{ url_for('recipes') }}" class="btn btn-success btn-lg">Browse Recipes</a>
+            {% if not session.get('user_id') %}
+            <a href="{{ url_for('signup') }}" class="btn btn-outline-success btn-lg">Join Now</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <img src="{{ url_for('static', filename='img/hero-image.jpg') }}" alt="Cooking" class="img-fluid rounded-3 shadow-lg">
+    </div>
+</div>
+
+<h2 class="mb-4">Featured Recipes</h2>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
+    {% for recipe in recipes %}
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ recipe.title }}</h5>
+                <p class="card-text text-muted">
+                    <i class="far fa-clock me-1"></i> {{ recipe.readyInMinutes }} min
+                    {% if recipe.vegetarian %}
+                    <span class="badge bg-success ms-2">Vegetarian</span>
+                    {% endif %}
+                    {% if recipe.vegan %}
+                    <span class="badge bg-success ms-2">Vegan</span>
+                    {% endif %}
+                    {% if recipe.glutenFree %}
+                    <span class="badge bg-warning ms-2">Gluten-Free</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}" class="btn btn-outline-success w-100">View Recipe</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row bg-light p-4 rounded-3 mb-5">
+    <div class="col-md-4 text-center">
+        <div class="display-4 text-success mb-3">
+            <i class="fas fa-search"></i>
+        </div>
+        <h3>Discover Recipes</h3>
+        <p>Browse through thousands of recipes from various cuisines and dietary preferences.</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <div class="display-4 text-success mb-3">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <h3>Plan Your Meals</h3>
+        <p>Create meal plans and sync them directly with your Google Calendar.</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <div class="display-4 text-success mb-3">
+            <i class="fas fa-star"></i>
+        </div>
+        <h3>Rate and Review</h3>
+        <p>Share your cooking experiences by rating and reviewing recipes.</p>
+    </div>
+</div>
+
+<h2 class="mb-4">Explore by Category</h2>
+<div class="row g-4">
+    <div class="col-md-3 col-sm-6">
+        <a href="{{ url_for('recipes') }}?category=breakfast" class="text-decoration-none">
+            <div class="card bg-dark text-white h-100">
+                <img src="{{ url_for('static', filename='img/breakfast.jpg') }}" class="card-img" alt="Breakfast">
+                <div class="card-img-overlay d-flex align-items-end">
+                    <h5 class="card-title mb-0 w-100 text-center py-2" style="background-color: rgba(0,0,0,0.6);">Breakfast</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a href="{{ url_for('recipes') }}?category=lunch" class="text-decoration-none">
+            <div class="card bg-dark text-white h-100">
+                <img src="{{ url_for('static', filename='img/lunch.jpg') }}" class="card-img" alt="Lunch">
+                <div class="card-img-overlay d-flex align-items-end">
+                    <h5 class="card-title mb-0 w-100 text-center py-2" style="background-color: rgba(0,0,0,0.6);">Lunch</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a href="{{ url_for('recipes') }}?category=dinner" class="text-decoration-none">
+            <div class="card bg-dark text-white h-100">
+                <img src="{{ url_for('static', filename='img/dinner.jpg') }}" class="card-img" alt="Dinner">
+                <div class="card-img-overlay d-flex align-items-end">
+                    <h5 class="card-title mb-0 w-100 text-center py-2" style="background-color: rgba(0,0,0,0.6);">Dinner</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a href="{{ url_for('recipes') }}?category=dessert" class="text-decoration-none">
+            <div class="card bg-dark text-white h-100">
+                <img src="{{ url_for('static', filename='img/dessert.jpg') }}" class="card-img" alt="Dessert">
+                <div class="card-img-overlay d-flex align-items-end">
+                    <h5 class="card-title mb-0 w-100 text-center py-2" style="background-color: rgba(0,0,0,0.6);">Dessert</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %} 

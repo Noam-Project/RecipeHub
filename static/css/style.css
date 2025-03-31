@@ -1,0 +1,162 @@
+/* Custom styles for RecipeHub */
+
+/* General typography improvements */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Recipe image enhancements */
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Star rating system */
+.rating {
+    display: inline-block;
+    unicode-bidi: bidi-override;
+    direction: rtl;
+    text-align: center;
+}
+
+.rating input {
+    display: none;
+}
+
+.rating label {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    color: #ccc;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.rating label:before {
+    content: '\2605';
+}
+
+.rating input:checked ~ label,
+.rating input:checked ~ label ~ label {
+    color: #ffb000;
+}
+
+.rating:not(:checked) > label:hover,
+.rating:not(:checked) > label:hover ~ label {
+    color: #ffb000;
+}
+
+/* Recipe details page */
+.recipe-header {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    color: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.recipe-header-overlay {
+    background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7));
+    padding: 2rem;
+}
+
+.recipe-ingredients li {
+    margin-bottom: 0.5rem;
+}
+
+.recipe-instructions {
+    line-height: 1.8;
+}
+
+/* User profile */
+.profile-header {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Recipe category cards */
+.category-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+}
+
+.category-card img {
+    transition: transform 0.5s;
+    height: 180px;
+    object-fit: cover;
+}
+
+.category-card:hover img {
+    transform: scale(1.05);
+}
+
+.category-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+/* Admin dashboard */
+.admin-stats {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.admin-stat-item {
+    text-align: center;
+}
+
+.admin-stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #198754;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+    .recipe-header {
+        background-position: center;
+    }
+    
+    .recipe-header-overlay {
+        padding: 1rem;
+    }
+    
+    .recipe-header h1 {
+        font-size: 1.8rem;
+    }
+} 
